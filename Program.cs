@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Linq;
 
 
 // Класс парсер
@@ -22,7 +23,7 @@ class ObjParser
     public static List<string> faces = new List<string>();
 
     // Возвращает список где каждая линия файла это элемент списка
-    private static string[] getAllText(string filePath)
+    private static string[] GetAllText(string filePath)
     {
         // Каждая строка файла отдельный элемент в массиве
         string[] linesArray = File.ReadAllLines(filePath);
@@ -30,8 +31,17 @@ class ObjParser
         return linesArray;
     }
 
+    // Возвращает новую строку без токена в начале линии. То есть остается только значение
+    public static string RemoveToken(string line)
+    {
+        string[] words = line.Split();
+        string result = string.Join(" ", words.Skip(1));
+
+        return result;
+    }
+
     // Сортирует линии по отдельным спискам. Вершины в одном списке, нормали в одной списке и т.д
-    private static void sortLines(string[] lines)
+    private static void SortLines(string[] lines)
     {
         // Проверяeт каждую линию и добавляет ее в соответстующий список в зависимости от токена(v/vt и т.д)
         foreach (string line in lines)
@@ -39,24 +49,34 @@ class ObjParser
             // Вершина 
             if (line[0] == 'v' && line[1] == ' ')
             {
-                vertexes.Add(line);
+                vertexes.Add(RemoveToken(line));
             }
             // Текстура
             else if (line[0] == 'v' && line[1] == 't')
             {
-                textures.Add(line);
+                textures.Add(RemoveToken(line));
             }
             // Нормаль
             else if (line[0] == 'v' && line[1] == 'n')
             {
-                normals.Add(line);
+                normals.Add(RemoveToken(line));
             }
             // Лицо
             else if (line[0] == 'f')
             {
-                faces.Add(line);
+                faces.Add(RemoveToken(line));
             }
         }
+    }
+
+    // Заменяет индексы на их настоящие значения в лицах(f)
+    private static void ReplaceFaceValues()
+    {
+        foreach (string face in faces)
+        {
+            // Заменять
+        }
+
     }
 
     // Это будет финальной функций которая будет делать все сразу.
@@ -64,13 +84,14 @@ class ObjParser
     public static void Parse(string filePath)
     {
         // Получаем список со всеми линиями текста
-        string[] lines = getAllText(filePath);
+        string[] lines = GetAllText(filePath);
 
         // Запихиваем из по спискам
-        sortLines(lines);
+        SortLines(lines);
 
         // TODO
-        // Огранизует в тип данных который понятен для движков 3д рендеринга
+        // Огранизует в тип данных который понятен для движков 3д рендеринга. Лица со своими настоящими значениями, а не индексы
+        ReplaceFaceValues();
     }
 }
 
@@ -85,7 +106,7 @@ class Program
         ObjParser.Parse(filePath);
 
         // Просто выводим в консоль чтобы убедить что работает как задуманно
-        foreach (string item in ObjParser.normals)
+        foreach (string item in ObjParser.vertexes)
         {
             Console.WriteLine(item);
         }
