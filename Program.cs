@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
+using System.Globalization;
 
 
 // Класс парсер
@@ -11,13 +12,13 @@ using System.Linq;
 class ObjParser
 {
     // Координаты всех вершин треугольников
-    public static List<string> vertexes = new List<string>();
+    public static List<List<float>> vertexes = new List<List<float>>();
 
     // Координаты текстур
-    public static List<string> textures = new List<string>();
+    public static List<List<float>> textures = new List<List<float>>();
 
     // Нормали
-    public static List<string> normals = new List<string>();
+    public static List<List<float>> normals = new List<List<float>>();
 
     // Лица треугольников
     public static List<string> faces = new List<string>();
@@ -32,10 +33,34 @@ class ObjParser
     }
 
     // Возвращает новую строку без токена в начале линии. То есть остается только значение
-    public static string RemoveToken(string line)
+    private static string RemoveToken(string line)
     {
+        // Массив всех 'слов' линии разделенный пробелом 
         string[] words = line.Split();
-        string result = string.Join(" ", words.Skip(1));
+
+        // Удаляем токен(f, vn etc), то есть первый элемент массива
+        string tokenlessValues = string.Join(" ", words.Skip(1));
+
+        return tokenlessValues;
+    }
+
+    // Делает из линии список, где значения это координаты вершины по x, y, z
+    private static List<float> modifyLine(string line)
+    {
+        // Массив всех слов линии, разделенные пробелом 
+        string[] words = line.Split();
+
+        // Удаляем токен(f, vn etc), то есть первый элемент массива
+        string[] tokenlessValues = words.Skip(1).ToArray();
+
+        // Список координат вершин где будут 3 элемента: x, y, z
+        List<float> result = new List<float>();
+
+        foreach (string value in tokenlessValues)
+        {
+            // Добавляет в список каждую из координат в типе данных float
+            result.Add(float.Parse(value.Trim(), CultureInfo.InvariantCulture));
+        }
 
         return result;
     }
@@ -49,17 +74,17 @@ class ObjParser
             // Вершина 
             if (line[0] == 'v' && line[1] == ' ')
             {
-                vertexes.Add(RemoveToken(line));
+                vertexes.Add(modifyLine(RemoveToken(line)));
             }
             // Текстура
             else if (line[0] == 'v' && line[1] == 't')
             {
-                textures.Add(RemoveToken(line));
+                vertexes.Add(modifyLine(RemoveToken(line)));
             }
             // Нормаль
             else if (line[0] == 'v' && line[1] == 'n')
             {
-                normals.Add(RemoveToken(line));
+                vertexes.Add(modifyLine(RemoveToken(line)));
             }
             // Лицо
             else if (line[0] == 'f')
@@ -67,16 +92,6 @@ class ObjParser
                 faces.Add(RemoveToken(line));
             }
         }
-    }
-
-    // Заменяет индексы на их настоящие значения в лицах(f)
-    private static void ReplaceFaceValues()
-    {
-        foreach (string face in faces)
-        {
-            // Заменять
-        }
-
     }
 
     // Это будет финальной функций которая будет делать все сразу.
@@ -88,10 +103,6 @@ class ObjParser
 
         // Запихиваем из по спискам
         SortLines(lines);
-
-        // TODO
-        // Огранизует в тип данных который понятен для движков 3д рендеринга. Лица со своими настоящими значениями, а не индексы
-        ReplaceFaceValues();
     }
 }
 
@@ -106,9 +117,10 @@ class Program
         ObjParser.Parse(filePath);
 
         // Просто выводим в консоль чтобы убедить что работает как задуманно
-        foreach (string item in ObjParser.vertexes)
+        foreach (List<float> line in ObjParser.vertexes)
         {
-            Console.WriteLine(item);
+            Console.WriteLine(line);
+            
         }
         Console.ReadLine();
     }
