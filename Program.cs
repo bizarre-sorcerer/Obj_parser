@@ -47,16 +47,13 @@ class ObjParser
     // Делает из линии список, где значения это координаты вершины по x, y, z
     private static List<float> modifyLine(string line)
     {
-        // Массив всех слов линии, разделенные пробелом 
-        string[] words = line.Split();
-
-        // Удаляем токен(f, vn etc), то есть первый элемент массива
-        string[] tokenlessValues = words.Skip(1).ToArray();
+        // Массив всех значений линии, разделенные пробелом 
+        string[] values = line.Split();
 
         // Список координат вершин где будут 3 элемента: x, y, z
         List<float> result = new List<float>();
 
-        foreach (string value in tokenlessValues)
+        foreach (string value in values)
         {
             // Добавляет в список каждую из координат в типе данных float
             result.Add(float.Parse(value.Trim(), CultureInfo.InvariantCulture));
@@ -117,10 +114,9 @@ class Program
         ObjParser.Parse(filePath);
 
         // Просто выводим в консоль чтобы убедить что работает как задуманно
-        foreach (List<float> line in ObjParser.vertexes)
+        foreach (float value in ObjParser.vertexes[1])
         {
-            Console.WriteLine(line);
-            
+            Console.WriteLine(value);       
         }
         Console.ReadLine();
     }
