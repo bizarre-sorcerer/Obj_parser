@@ -21,7 +21,8 @@ class ObjParser
     public static List<List<float>> normals = new List<List<float>>();
 
     // Лица треугольников
-    public static List<string> faces = new List<string>();
+    // public static List<string> faces = new List<string>();
+    public static List<List<List<float>>> faces = new List<List<List<float>>>();
 
     // Возвращает список где каждая линия файла это элемент списка
     private static string[] GetAllText(string filePath)
@@ -86,7 +87,22 @@ class ObjParser
             // Лицо
             else if (line[0] == 'f')
             {
-                faces.Add(RemoveToken(line));
+                string faceString = RemoveToken(line);
+                List<List<float>> currentFace = new List<List<float>>();
+
+                // "1//1 246//1 332//1 117//1"
+                foreach (string item in faceString.Split(" ")) // [["1//1"], ["246//1"], ["332//1"], ["117//1"]]
+                {
+                    string[] valuesStrings = item.Split("//"); // ["1", "1"] и т.д
+                    List<float> point = new List<float>();  // [1, 1]
+
+                    foreach (string value in valuesStrings)
+                    {
+                        point.Add(float.Parse(value));
+                    }
+                    currentFace.Add(point);
+                }
+                faces.Add(currentFace);
             }
         }
     }
@@ -113,10 +129,16 @@ class Program
         // Парсит
         ObjParser.Parse(filePath);
 
-        // Просто выводим в консоль чтобы убедить что работает как задуманно
-        foreach (float value in ObjParser.vertexes[1])
+        // Просто выводим в консоль чтобы убедить что работает как 
+        foreach (List<List<float>> face in ObjParser.faces)
         {
-            Console.WriteLine(value);       
+            foreach (List<float> point in face)
+            {
+                foreach (float value in point)
+                {
+                    Console.WriteLine(value);
+                }
+            }
         }
         Console.ReadLine();
     }
