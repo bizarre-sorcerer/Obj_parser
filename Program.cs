@@ -5,7 +5,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 using System.Globalization;
 
-
 // Класс парсер
 // В метод Parse(filePath) дается путь к .obj файлу. Он его парсит и извлекает линии в отдельные списки в зависимости от токена в начале линии(v/vt/vn/f)
 // Списки не возвращаются, а храняться статически как свойства класса
@@ -40,8 +39,7 @@ class ObjParser
     //            []
     //        ]
     // ]
-
-    public static List<List<List<float>>> faces = new List<List<List<float>>>();
+    public static List<List<List<int>>> faces = new List<List<List<int>>>();
 
     // Возвращает список где каждая линия файла это элемент списка
     private static string[] GetAllText(string filePath)
@@ -107,17 +105,17 @@ class ObjParser
             else if (line[0] == 'f')
             {
                 string faceString = RemoveToken(line);
-                List<List<float>> currentFace = new List<List<float>>();
+                List<List<int>> currentFace = new List<List<int>>();
 
                 // "1//1 246//1 332//1 117//1"
                 foreach (string item in faceString.Split(" ")) // [["1//1"], ["246//1"], ["332//1"], ["117//1"]]
                 {
                     string[] valuesStrings = item.Split("//"); // ["1", "1"] и т.д
-                    List<float> point = new List<float>();  // [1, 1]
+                    List<int> point = new List<int>();  // [1, 1]
 
                     foreach (string value in valuesStrings)
                     {
-                        point.Add(float.Parse(value));
+                        point.Add(int.Parse(value));
                     }
                     currentFace.Add(point);
                 }
@@ -149,14 +147,12 @@ class Program
         ObjParser.Parse(filePath);
 
         // Просто выводим в консоль чтобы убедить что работает как 
-        foreach (List<List<float>> face in ObjParser.faces)
+        foreach (List<List<int>> face in ObjParser.faces)
         {
-            foreach (List<float> point in face)
+            foreach (List<int> point in face)
             {
-                foreach (float value in point)
-                {
-                    Console.WriteLine(value);
-                }
+                int vertexIndex = point[0]-1;
+                Console.WriteLine(ObjParser.vertexes[vertexIndex]);
             }
         }
         Console.ReadLine();
