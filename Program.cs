@@ -21,7 +21,26 @@ class ObjParser
     public static List<List<float>> normals = new List<List<float>>();
 
     // Лица треугольников
-    // public static List<string> faces = new List<string>();
+    // faces = [
+    //      // Первое лицо
+    //      [
+    //            [553, 970],  // Первая точка. Элементы этого списка вершина и нормаль(v, vn)
+    //            [],  // Вторая точка
+    //            []   // Третья точка
+    //      ],
+    // Второе лицо
+    //      [
+    //            [],
+    //            [],
+    //            []
+    //        ],
+    //      [
+    //            [],
+    //            [],
+    //            []
+    //        ]
+    // ]
+
     public static List<List<List<float>>> faces = new List<List<List<float>>>();
 
     // Возвращает список где каждая линия файла это элемент списка
