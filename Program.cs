@@ -80,6 +80,43 @@ class ObjParser
         return result;
     }
 
+    // Парсит именно лицы, проебразует строку в вид более удобный для использования
+    private static void parseFace(string line)
+    {
+        // Строка лица, без токена f
+        string faceString = RemoveToken(line);  // Пример: "1//1 246//1 332//1 117//1"
+
+        // Список, где каждый элемент это одна точка. Каждая из точек тоже список, где элементы это v, vt и vn
+        List<List<int>> currentFace = new List<List<int>>();
+
+        // Значение по которому строка делиться
+        string splitValue;
+
+        // Если в лице нет текстуры(3//2) то делит по "//", в другому случае по "/"
+        foreach (string item in faceString.Split(' ')) // [["1//1"], ["246//1"], ["332//1"], ["117//1"]]
+        {
+            if (item.Count(c => c == '/') == 2)
+            {
+                splitValue = "//";
+            }
+            else
+            {
+                splitValue = "/";
+            }
+
+            //string[] valuesStrings = item.Split("//"); // ["1", "1"] и т.д
+            string[] valuesStrings = item.Replace(splitValue, "\0").Split('\0');
+            List<int> point = new List<int>();  // [1, 1]
+
+            foreach (string value in valuesStrings)
+            {
+                point.Add(int.Parse(value));
+            }
+            currentFace.Add(point);
+        }
+        faces.Add(currentFace);
+    }
+
     // Сортирует линии по отдельным спискам. Вершины в одном списке, нормали в одной списке и т.д
     private static void SortLines(string[] lines)
     {
@@ -104,22 +141,7 @@ class ObjParser
             // Лицо
             else if (line[0] == 'f')
             {
-                string faceString = RemoveToken(line);
-                List<List<int>> currentFace = new List<List<int>>();
-
-                // "1//1 246//1 332//1 117//1"
-                foreach (string item in faceString.Split(" ")) // [["1//1"], ["246//1"], ["332//1"], ["117//1"]]
-                {
-                    string[] valuesStrings = item.Split("//"); // ["1", "1"] и т.д
-                    List<int> point = new List<int>();  // [1, 1]
-
-                    foreach (string value in valuesStrings)
-                    {
-                        point.Add(int.Parse(value));
-                    }
-                    currentFace.Add(point);
-                }
-                faces.Add(currentFace);
+                parseFace(line);
             }
         }
     }
@@ -151,7 +173,7 @@ class Program
         {
             foreach (List<int> point in face)
             {
-                int vertexIndex = point[0]-1;
+                int vertexIndex = point[0] - 1;
                 Console.WriteLine(ObjParser.vertexes[vertexIndex]);
             }
         }
