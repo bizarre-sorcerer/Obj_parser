@@ -41,8 +41,8 @@ class ObjParser
     // ]
     public static List<List<List<int>>> faces = new List<List<List<int>>>();
 
-    // Возвращает новую строку без токена в начале линии. То есть остается только значение
-    private static string RemoveToken(string line)
+    // Делает из линии список, где значения это координаты вершины по x, y, z
+    private static List<float> modifyLine(string line)
     {
         // Массив всех 'слов' линии разделенный пробелом 
         string[] words = line.Split();
@@ -50,14 +50,8 @@ class ObjParser
         // Удаляем токен(f, vn etc), то есть первый элемент массива
         string tokenlessValues = string.Join(" ", words.Skip(1));
 
-        return tokenlessValues;
-    }
-
-    // Делает из линии список, где значения это координаты вершины по x, y, z
-    private static List<float> modifyLine(string line)
-    {
         // Массив всех значений линии, разделенные пробелом 
-        string[] values = line.Split();
+        string[] values = tokenlessValues.Split();
 
         // Список координат вершин где будут 3 элемента: x, y, z
         List<float> result = new List<float>();
@@ -74,8 +68,11 @@ class ObjParser
     // Парсит именно лицы, проебразует строку в вид более удобный для использования
     private static void parseFace(string line)
     {
-        // Строка лица, без токена f
-        string faceString = RemoveToken(line);  // Пример: "1//1 246//1 332//1 117//1"
+        // Массив всех 'слов' линии разделенный пробелом 
+        string[] words = line.Split();
+
+        // Удаляем токен(f, vn etc), то есть первый элемент массива
+        string faceString = string.Join(" ", words.Skip(1));    // Пример: "1//1 246//1 332//1 117//1"
 
         // Список, где каждый элемент это одна точка. Каждая из точек тоже список, где элементы это v, vt и vn
         List<List<int>> currentFace = new List<List<int>>();
@@ -117,17 +114,17 @@ class ObjParser
             // Вершина 
             if (line[0] == 'v' && line[1] == ' ')
             {
-                vertexes.Add(modifyLine(RemoveToken(line)));
+                vertexes.Add(modifyLine(line));
             }
             // Текстура
             else if (line[0] == 'v' && line[1] == 't')
             {
-                vertexes.Add(modifyLine(RemoveToken(line)));
+                vertexes.Add(modifyLine(line));
             }
             // Нормаль
             else if (line[0] == 'v' && line[1] == 'n')
             {
-                vertexes.Add(modifyLine(RemoveToken(line)));
+                normals.Add(modifyLine(line));
             }
             // Лицо
             else if (line[0] == 'f')
@@ -154,7 +151,8 @@ class Program
     static void Main()
     {
         // Путь к файлу
-        string filePath = "../../../sword/sword.obj";
+        // string filePath = "../../../3D_models/robot/Rmk3.obj";
+        string filePath = "../../../3D_models/sword/sword.obj";
 
         // Парсит
         ObjParser.Parse(filePath);
@@ -164,8 +162,10 @@ class Program
         {
             foreach (List<int> point in face)
             {
-                int vertexIndex = point[0] - 1;
-                Console.WriteLine(ObjParser.vertexes[vertexIndex]);
+                foreach (int value in point)
+                {
+                   Console.WriteLine(value);
+                }
             }
         }
         Console.ReadLine();
