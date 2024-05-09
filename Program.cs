@@ -112,22 +112,22 @@ class ObjParser
         foreach (string line in lines)
         {
             // Вершина 
-            if (line[0] == 'v' && line[1] == ' ')
+            if (line.StartsWith("v "))
             {
                 vertexes.Add(modifyLine(line));
             }
             // Текстура
-            else if (line[0] == 'v' && line[1] == 't')
+            else if (line.StartsWith("vt"))
             {
-                vertexes.Add(modifyLine(line));
+                textures.Add(modifyLine(line));
             }
             // Нормаль
-            else if (line[0] == 'v' && line[1] == 'n')
+            else if (line.StartsWith("vn"))
             {
                 normals.Add(modifyLine(line));
             }
             // Лицо
-            else if (line[0] == 'f')
+            else if (line.StartsWith("f "))
             {
                 parseFace(line);
             }
