@@ -85,11 +85,14 @@ class ObjParser
         
         foreach (string point in tokenlessString.Split(' '))
         {
+            // Пропускает пустую сабстроку
+            if (string.IsNullOrWhiteSpace(point))
+            {
+                continue;
+            }
+
             int delimetersCount = point.Count(c => c == '/');
 
-            Console.WriteLine(delimetersCount);
-            Console.ReadLine();
-            
             // Если у поллигона только вертексы есть
             if (delimetersCount == 0)
             {
@@ -119,12 +122,6 @@ class ObjParser
             }
 
         }
-
-        foreach (int value in currentFace[0])
-        {
-            Console.WriteLine(value);
-        }
-        Console.ReadLine();
 
         faces.Add(currentFace);
     }
@@ -167,6 +164,7 @@ class ObjParser
 
         // Запихиваем из по спискам
         SortLines(lines);
+        Console.ReadLine();
     }
 }
 
@@ -175,18 +173,11 @@ class Program
     static void Main()
     {
         // Путь к файлу
-        //string filePath = "../../../3D_models/robot/Rmk3.obj";
-        // string filePath = "../../../3D_models/sword/sword.obj";
+        string filePath = "../../../3D_models/robot/Rmk3.obj";
+        //string filePath = "../../../3D_models/sword/sword.obj";
 
         // Парсит
-        //ObjParser.Parse(filePath);
-
-        //string face = "f 343435 343436 343434";
-        //string face = "f 1006//725 560//725 567//725 1018//725";
-        //string face = "f 23/2 32/34 35/34";
-        string face = "f 1006/454/725 560/345/725 567/345/725 1018/345/725";
-
-        ObjParser.ParseFace(face);
+        ObjParser.Parse(filePath);
     }
 }
 
