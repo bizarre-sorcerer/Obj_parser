@@ -103,7 +103,7 @@ class ObjParser
             {
                 List<int> pointValues = new List<int>();
 
-                foreach (string value in point.Split("/"))
+                foreach (string value in point.Split('/'))
                 {
                     pointValues.Add(int.Parse(value));
                 }
@@ -114,7 +114,7 @@ class ObjParser
             {
                 List<int> pointValues = new List<int>();
 
-                foreach (string value in point.Split("//"))
+                foreach (string value in point.Split(new string[] { "//" }, StringSplitOptions.None))
                 {
                     pointValues.Add(int.Parse(value));
                 }
