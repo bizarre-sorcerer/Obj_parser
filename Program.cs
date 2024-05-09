@@ -164,7 +164,6 @@ class ObjParser
 
         // Запихиваем из по спискам
         SortLines(lines);
-        Console.ReadLine();
     }
 }
 
