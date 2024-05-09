@@ -42,7 +42,7 @@ class ObjParser
     public static List<List<List<int>>> faces = new List<List<List<int>>>();
 
     // Делает из линии список, где значения это координаты вершины по x, y, z
-    private static List<float> modifyLine(string line)
+    private static List<float> ModifyLine(string line)
     {
         // Массив всех 'слов' линии разделенный пробелом 
         string[] words = line.Split();
@@ -66,42 +66,66 @@ class ObjParser
     }
 
     // Парсит именно лицы, проебразует строку в вид более удобный для использования
-    private static void parseFace(string line)
+    public static void ParseFace(string line)
     {
         // Массив всех 'слов' линии разделенный пробелом 
         string[] words = line.Split();
 
-        // Удаляем токен(f, vn etc), то есть первый элемент массива
-        string faceString = string.Join(" ", words.Skip(1));    // Пример: "1//1 246//1 332//1 117//1"
+        // Удаляем токен(f, vn etc), то есть первый элемент массива. Строка без токена
+        string tokenlessString = string.Join(" ", words.Skip(1));    // Пример: "1//1 246//1 332//1 117//1"
 
         // Список, где каждый элемент это одна точка. Каждая из точек тоже список, где элементы это v, vt и vn
         List<List<int>> currentFace = new List<List<int>>();
 
-        // Значение по которому строка делиться
-        string splitValue;
-
-        // Если в лице нет текстуры(3//2) то делит по "//", в другому случае по "/"
-        foreach (string item in faceString.Split(' ')) // [["1//1"], ["246//1"], ["332//1"], ["117//1"]]
+        // Виды строк: 
+        // string face = "f 343435 343436 343434";
+        // string face = "f 1006//725 560//725 567//725 1018//725";
+        // string face = "f 23/2 32/34 35/34";
+        // string face "f 1006/454/725 560/345/725 567/345/725 1018/345/725"
+        
+        foreach (string point in tokenlessString.Split(' '))
         {
-            if (item.Count(c => c == '/') == 2)
+            int delimetersCount = point.Count(c => c == '/');
+
+            Console.WriteLine(delimetersCount);
+            Console.ReadLine();
+            
+            // Если у поллигона только вертексы есть
+            if (delimetersCount == 0)
             {
-                splitValue = "//";
+                currentFace.Add(new List<int> { int.Parse(point) });
             }
-            else
+            // Если у поллигона есть все или все кроме нормали
+            else if (delimetersCount == 1)
             {
-                splitValue = "/";
+                List<int> pointValues = new List<int>();
+
+                foreach (string value in point.Split("/"))
+                {
+                    pointValues.Add(int.Parse(value));
+                }
+                currentFace.Add(pointValues);
+            }
+            // У полигона нет текстуры
+            else if (delimetersCount == 2)
+            {
+                List<int> pointValues = new List<int>();
+
+                foreach (string value in point.Split("//"))
+                {
+                    pointValues.Add(int.Parse(value));
+                }
+                currentFace.Add(pointValues);
             }
 
-            //string[] valuesStrings = item.Split("//"); // ["1", "1"] и т.д
-            string[] valuesStrings = item.Replace(splitValue, "\0").Split('\0');
-            List<int> point = new List<int>();  // [1, 1]
-
-            foreach (string value in valuesStrings)
-            {
-                point.Add(int.Parse(value));
-            }
-            currentFace.Add(point);
         }
+
+        foreach (int value in currentFace[0])
+        {
+            Console.WriteLine(value);
+        }
+        Console.ReadLine();
+
         faces.Add(currentFace);
     }
 
@@ -114,22 +138,22 @@ class ObjParser
             // Вершина 
             if (line.StartsWith("v "))
             {
-                vertexes.Add(modifyLine(line));
+                vertexes.Add(ModifyLine(line));
             }
             // Текстура
             else if (line.StartsWith("vt"))
             {
-                textures.Add(modifyLine(line));
+                textures.Add(ModifyLine(line));
             }
             // Нормаль
             else if (line.StartsWith("vn"))
             {
-                normals.Add(modifyLine(line));
+                normals.Add(ModifyLine(line));
             }
             // Лицо
             else if (line.StartsWith("f "))
             {
-                parseFace(line);
+                ParseFace(line);
             }
         }
     }
@@ -151,24 +175,18 @@ class Program
     static void Main()
     {
         // Путь к файлу
-        // string filePath = "../../../3D_models/robot/Rmk3.obj";
-        string filePath = "../../../3D_models/sword/sword.obj";
+        //string filePath = "../../../3D_models/robot/Rmk3.obj";
+        // string filePath = "../../../3D_models/sword/sword.obj";
 
         // Парсит
-        ObjParser.Parse(filePath);
+        //ObjParser.Parse(filePath);
 
-        // Просто выводим в консоль чтобы убедить что работает как 
-        foreach (List<List<int>> face in ObjParser.faces)
-        {
-            foreach (List<int> point in face)
-            {
-                foreach (int value in point)
-                {
-                   Console.WriteLine(value);
-                }
-            }
-        }
-        Console.ReadLine();
+        //string face = "f 343435 343436 343434";
+        //string face = "f 1006//725 560//725 567//725 1018//725";
+        //string face = "f 23/2 32/34 35/34";
+        string face = "f 1006/454/725 560/345/725 567/345/725 1018/345/725";
+
+        ObjParser.ParseFace(face);
     }
 }
 
