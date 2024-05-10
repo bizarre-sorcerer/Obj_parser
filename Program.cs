@@ -5,11 +5,47 @@ using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 using System.Globalization;
 
+class ObjectGroup
+{
+    // Координаты всех вершин треугольников. Каждый элемент это одна вершина и список, где хранятся значения координат по x, y, z
+    public List<List<float>> vertexes;
+
+    // Координаты текстур
+    public List<List<float>> textures;
+
+    // Нормали
+    public List<List<float>> normals;
+
+    //////////////
+    // Лица треугольников
+    // faces = [
+    //      // Первое лицо
+    //      [
+    //            [553, 970],  // Первая точка. Элементы этого списка вершина и нормаль(v, vn)
+    //            [],  // Вторая точка
+    //            []   // Третья точка
+    //      ]
+    //////////////
+    public List<List<List<int>>> faces = new List<List<List<int>>>();
+
+    public ObjectGroup(List<List<float>> vertexes, List<List<float>> textures, List<List<float>> normals, List<List<List<int>>> faces)
+    {
+        this.vertexes = vertexes;
+        this.textures = textures;
+        this.normals = normals;
+        this.faces = faces;
+    }
+}
+
 // Класс парсер
 // В метод Parse(filePath) дается путь к .obj файлу. Он его парсит и извлекает линии в отдельные списки в зависимости от токена в начале линии(v/vt/vn/f)
 // Списки не возвращаются, а храняться статически как свойства класса
-class ObjParser
+class ObjectParser
 {
+   // Список всех групп
+    public static List<ObjectGroup> groups = new List<ObjectGroup>();
+
+    //// Данные текущей группы (g). Когда парситься вся группа, с этими данными создается объект класса ObjectGroup и списки очищаються для след группы ////
     // Координаты всех вершин треугольников. Каждый элемент это одна вершина и список, где хранятся значения координат по x, y, z
     public static List<List<float>> vertexes = new List<List<float>>();
 
@@ -26,19 +62,7 @@ class ObjParser
     //            [553, 970],  // Первая точка. Элементы этого списка вершина и нормаль(v, vn)
     //            [],  // Вторая точка
     //            []   // Третья точка
-    //      ],
-    // Второе лицо
-    //      [
-    //            [],
-    //            [],
-    //            []
-    //        ],
-    //      [
-    //            [],
-    //            [],
-    //            []
-    //        ]
-    // ]
+    //      ]
     public static List<List<List<int>>> faces = new List<List<List<int>>>();
 
     // Делает из линии список, где значения это координаты вершины по x, y, z
@@ -129,9 +153,14 @@ class ObjParser
     // Сортирует линии по отдельным спискам. Вершины в одном списке, нормали в одной списке и т.д
     private static void SortLines(string[] lines)
     {
+        int count = 0;
+        int currentLine = 0;
+
         // Проверяeт каждую линию и добавляет ее в соответстующий список в зависимости от токена(v/vt и т.д)
         foreach (string line in lines)
         {
+            currentLine += 1;
+            
             // Вершина 
             if (line.StartsWith("v "))
             {
@@ -151,6 +180,24 @@ class ObjParser
             else if (line.StartsWith("f "))
             {
                 ParseFace(line);
+            } 
+            else if (line.StartsWith("g "))
+            {
+                count += 1;
+
+                ObjectGroup objGroup =  new ObjectGroup(vertexes, textures, normals, faces);
+                groups.Add(objGroup);
+                
+                vertexes.Clear();
+                textures.Clear();
+                normals.Clear();
+                faces.Clear();
+            } 
+
+            if (currentLine == lines.Count())
+            {
+                ObjectGroup objGroup = new ObjectGroup(vertexes, textures, normals, faces);
+                groups.Add(objGroup);
             }
         }
     }
@@ -172,11 +219,14 @@ class Program
     static void Main()
     {
         // Путь к файлу
-        string filePath = "../../../3D_models/robot/Rmk3.obj";
-        //string filePath = "../../../3D_models/sword/sword.obj";
+        //string filePath = "../../../3D_models/robot/Rmk3.obj";
+        string filePath = "../../../3D_models/sword/sword.obj";
 
         // Парсит
-        ObjParser.Parse(filePath);
+        ObjectParser.Parse(filePath);
+
+        Console.WriteLine(ObjectParser.groups.Count);
+        Console.ReadLine();
     }
 }
 
