@@ -42,10 +42,14 @@ class ObjectGroup
 // Списки не возвращаются, а храняться статически как свойства класса
 class ObjectParser
 {
-   // Список всех групп
+    // Список всех групп
     public static List<ObjectGroup> groups = new List<ObjectGroup>();
+    
 
-    //// Данные текущей группы (g). Когда парситься вся группа, с этими данными создается объект класса ObjectGroup и списки очищаються для след группы ////
+    
+    /////////////////
+    ////////// Данные текущей группы (g). Когда парситься вся группа, с этими данными создается объект класса ObjectGroup и списки очищаються для след группы ////////
+    ////////////////
     // Координаты всех вершин треугольников. Каждый элемент это одна вершина и список, где хранятся значения координат по x, y, z
     public static List<List<float>> vertexes = new List<List<float>>();
 
@@ -64,6 +68,24 @@ class ObjectParser
     //            []   // Третья точка
     //      ]
     public static List<List<List<int>>> faces = new List<List<List<int>>>();
+
+
+
+    /////////////
+    /////////// Глобальные данные на весь файл. Тут все вертексы, нормали, текстуры и полигоны //////////
+    /////////////
+    public static List<List<float>> allVertexes = new List<List<float>>();
+
+    // Координаты текстур
+    public static List<List<float>> allTextures = new List<List<float>>();
+
+    // Нормали
+    public static List<List<float>> allNormals = new List<List<float>>();
+
+    // Лица
+    public static List<List<List<int>>> allFaces = new List<List<List<int>>>();
+
+
 
     // Делает из линии список, где значения это координаты вершины по x, y, z
     private static List<float> ModifyLine(string line)
@@ -90,7 +112,7 @@ class ObjectParser
     }
 
     // Парсит именно лицы, проебразует строку в вид более удобный для использования
-    public static void ParseFace(string line)
+    public static List<List<int>> ParseFace(string line)
     {
         // Массив всех 'слов' линии разделенный пробелом 
         string[] words = line.Split();
@@ -147,7 +169,7 @@ class ObjectParser
 
         }
 
-        faces.Add(currentFace);
+        return currentFace;
     }
 
     // Сортирует линии по отдельным спискам. Вершины в одном списке, нормали в одной списке и т.д
@@ -165,22 +187,26 @@ class ObjectParser
             if (line.StartsWith("v "))
             {
                 vertexes.Add(ModifyLine(line));
+                allVertexes.Add(ModifyLine(line));
             }
             // Текстура
             else if (line.StartsWith("vt"))
             {
                 textures.Add(ModifyLine(line));
+                allTextures.Add(ModifyLine(line));
             }
             // Нормаль
             else if (line.StartsWith("vn"))
             {
                 normals.Add(ModifyLine(line));
+                allNormals.Add(ModifyLine(line));
             }
             // Лицо
             else if (line.StartsWith("f "))
             {
-                ParseFace(line);
-            } 
+                faces.Add(ParseFace(line));
+                allFaces.Add(ParseFace(line));
+            }
             else if (line.StartsWith("g "))
             {
                 count += 1;
@@ -219,13 +245,14 @@ class Program
     static void Main()
     {
         // Путь к файлу
-        //string filePath = "../../../3D_models/robot/Rmk3.obj";
-        string filePath = "../../../3D_models/sword/sword.obj";
+        string filePath = "../../../3D_models/robot/Rmk3.obj";
+        //string filePath = "../../../3D_models/sword/sword.obj";
 
         // Парсит
         ObjectParser.Parse(filePath);
 
-        Console.WriteLine(ObjectParser.groups.Count);
+        Console.WriteLine(ObjectParser.groups[0].faces.Count());
+        
         Console.ReadLine();
     }
 }
